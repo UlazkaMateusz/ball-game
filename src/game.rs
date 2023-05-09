@@ -4,8 +4,11 @@ use bevy::prelude::*;
 use crate::AppState;
 
 use self::{
-    enemy::EnemyPlugin, player::PlayerPlugin, score::ScorePlugin, star::StarPlugin,
-    systems::toggle_simulation,
+    enemy::EnemyPlugin,
+    player::PlayerPlugin,
+    score::ScorePlugin,
+    star::StarPlugin,
+    systems::{pause_simulation, resume_simulation, toggle_simulation},
 };
 
 pub mod player;
@@ -29,8 +32,10 @@ impl Plugin for GamePlugin {
             .add_plugin(PlayerPlugin)
             .add_plugin(StarPlugin)
             .add_plugin(ScorePlugin)
+            .add_system(pause_simulation.in_schedule(OnEnter(AppState::Game)))
             .add_system(handle_game_over)
-            .add_system(toggle_simulation.run_if(in_state(AppState::Game)));
+            .add_system(toggle_simulation.run_if(in_state(AppState::Game)))
+            .add_system(resume_simulation.in_schedule(OnExit(AppState::Game)));
     }
 }
 pub struct GameOverEvent {
@@ -38,11 +43,11 @@ pub struct GameOverEvent {
 }
 
 pub fn handle_game_over(
-    mut commands: Commands,
     mut game_over_event_reader: EventReader<GameOverEvent>,
+    mut next_app_state: ResMut<NextState<AppState>>,
 ) {
     for event in game_over_event_reader.iter() {
         println!("Your fnal score is: {}", event.score);
-        commands.insert_resource(NextState(Some(AppState::GameOver)));
+        next_app_state.set(AppState::GameOver);
     }
 }

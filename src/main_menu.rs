@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 
+use self::ui::UIPlugin;
+
+pub mod ui;
+
 pub struct MainMenuPlugin;
 
 impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(main_menu);
+        app.add_plugin(UIPlugin);
     }
-}
-
-pub fn main_menu() {
-    println!("Main menu")
 }
